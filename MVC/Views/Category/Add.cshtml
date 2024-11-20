@@ -1,0 +1,16 @@
+﻿@model CategoryViewModel
+@{
+    ViewData["Title"] = "Add Category";
+}
+
+<div class="container my-4">
+    <h2>Add new category</h2>
+    <hr />
+    <partial name="_CategoryForm" model="Model" />
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+}
+

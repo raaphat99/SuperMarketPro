@@ -1,0 +1,23 @@
+﻿@model CategoryViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="container my-4">
+    @if (ViewBag.ErrorMessage is not null)
+    {
+        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+    }
+    else
+    {
+        <p>Category: @Model.Name</p>
+        <hr />
+        <partial name="_CategoryForm" model="Model" />
+    }
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+}
