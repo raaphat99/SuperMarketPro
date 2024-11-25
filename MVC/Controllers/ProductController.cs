@@ -44,6 +44,28 @@ namespace MVC.Controllers
         }
 
         [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var product = _context.Products.Find(id);
+
+            if (product == null)
+                return NotFound();
+
+            return PartialView("_ProductDetailsPartial", product);
+        }
+
+        [HttpGet]
+        public IActionResult GetProductsByCategory(int categoryId)
+        {
+            ICollection<Product> products = _context.Products.Where(p => p.CategoryId == categoryId && p.Quantity > 0).AsNoTracking().ToList();
+            if (products == null || !products.Any())
+            {
+                return NotFound();
+            }
+            return PartialView("_ProductsTablePartial", products);
+        }
+
+        [HttpGet]
         public IActionResult Add()
         {
             List<Category> categories = _context.Categories.ToList();
