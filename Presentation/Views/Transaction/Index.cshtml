@@ -1,0 +1,70 @@
+﻿@using Presentation.ViewModels
+@model TransactionSearchViewModel
+
+<div id="print-area">
+    <div class="container mt-4">
+
+        <div class="row mb-3">
+            <form asp-controller="Transaction" asp-action="Search" method="post" class="d-flex align-items-end justify-content-between">
+                <div class="col-md-3 col-12">
+                    <label asp-for="CashierName" class="form-label">Cashier Name</label>
+                    <input asp-for="CashierName" class="form-control" placeholder="Search by cashier">
+                </div>
+                <div class="col-md-3 col-12">
+                    <label asp-for="StartDate" class="form-label">Start Date</label>
+                    <input asp-for="StartDate" class="form-control">
+                </div>
+                <div class="col-md-3 col-12">
+                    <label asp-for="EndDate" class="form-label">End Date</label>
+                    <input asp-for="EndDate" class="form-control">
+                </div>
+                <div class="col-md-1 col-12">
+                    <input type="submit" value="Search" class="btn btn-primary w-100 mt-3 mt-md-0">
+                </div>
+                <div class="col-md-1 col-12">
+                    <input type="button" value="Print" id="print-btn" class="btn btn-primary w-100 mt-3 mt-md-0">
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Cashier Name</th>
+                            <th>DateTime</th>
+                            <th>Unit Price</th>
+                            <th>No. Items</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td>@transaction.TransactionId</td>
+                                <td>@transaction.CashierName</td>
+                                <td>@transaction.TimeStamp</td>
+                                <td>@transaction.Price</td>
+                                <td>@transaction.SoldQuantity</td>
+                                <td>@(transaction.Price * transaction.SoldQuantity)</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("print-btn").addEventListener("click", function () {
+            window.print();
+        });
+    </script>
+}

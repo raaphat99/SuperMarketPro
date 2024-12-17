@@ -1,0 +1,28 @@
+﻿@model IEnumerable<Transaction>
+
+<table class="table table-success">
+    <thead>
+        <tr>
+            <th>Transaction ID</th>
+            <th>Cashier Name</th>
+            <th>DateTime</th>
+            <th>Unit Price</th>
+            <th>No. Items</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaction in Model)
+        {
+            <tr>
+                <td>@transaction.TransactionId</td>
+                <td>@transaction.CashierName</td>
+                <td>@transaction.TimeStamp</td>
+                <td>@transaction.Price</td>
+                <td>@transaction.SoldQuantity</td>
+                <td>@(transaction.Price * transaction.SoldQuantity)</td>
+            </tr>
+        }
+
+    </tbody>
+</table>

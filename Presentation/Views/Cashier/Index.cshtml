@@ -1,0 +1,177 @@
+﻿@using Presentation.ViewModels
+@model CashierViewModel
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <h2>Cashier Console</h2>
+        </div>
+        <div class="col-12 col-md-8">
+            <p>Cashier Name: <b>Ahmed Raafat</b></p>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-12 col-md-4">
+            <div>
+                <div id="category-list">
+                    @if (Model.Categories != null && Model?.Categories?.Count > 0)
+                    {
+                        <div class="form-group">
+                            <label asp-for="SelectedCategoryId" class="control-label"></label>
+                            <select asp-for="SelectedCategoryId" id="category-select" class="form-select">
+                                <option value="" disabled selected>Choose a category</option>
+                                @foreach (Category category in Model.Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="SelectedCategoryId" class="text-danger"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">The category list is empty. Consider adding some.</div>
+                    }
+
+                </div>
+
+                <!-- Placeholder for the Products Table partial view -->
+                <div id="product-list" class="mt-2"></div>
+
+                <!-- Placeholder for the Products Details partial view -->
+                <div id="product-details" class="mt-2"></div>
+
+                <!-- Placeholder for the Sales Form -->
+                <div class="my-2">
+                    <form method="post" id="sales-form" style="display:none" asp-controller="Cashier" asp-action="ProcessTransaction">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="SelectedProductId" />
+                        <div class="form-group">
+                            <label asp-for="QuantityToSell" class="control-label"></label>
+                            <input asp-for="QuantityToSell" value="1" class="form-control" placeholder="Enter items count" />
+                            <span asp-validation-for="QuantityToSell" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-2">
+                            <input type="submit" value="Sell" class="btn btn-success" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-8" id="transactions">
+            @await Component.InvokeAsync("Transactions")
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // Check and render products for the previously selected category on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            const categorySelect = document.getElementById("category-select");
+            const previouslySelectedCategory = categorySelect.value; // Get the currently selected value
+            if (previouslySelectedCategory) {
+                loadProductsByCategory(previouslySelectedCategory);
+            }
+        });
+
+        // Function to fetch and render products based on the selected category
+        function loadProductsByCategory(categoryId) {
+            if (!categoryId) return; // Do nothing if no category is selected
+
+            fetch(`/Product/GetProductsByCategory?categoryId=${categoryId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load the products table.');
+                    return response.text(); // Return the partial view as HTML
+                })
+                .then(partialView => {
+                    document.getElementById("product-list").innerHTML = partialView;
+                    hideProductDetails();
+                    hideSalesForm();
+                    // Add event listener for product row clicks
+                    addRowClickListener();
+                })
+                .catch(error => {
+                    console.error("Error loading products table:", error);
+                    alert("An error occurred while loading the products.");
+                });
+        }
+
+        // Event listener for category selection change
+        document.getElementById("category-select").addEventListener("change", function () {
+            const categoryId = this.value;
+            loadProductsByCategory(categoryId);
+        });
+
+         // Add event listeners to product rows
+         function addRowClickListener() {
+             const table = document.getElementById("products-table");
+             if (table) {
+                 table.addEventListener("click", function(event) {
+                     const row = event.target.closest("tr.product-info");
+                     if (row) {
+                         highlightRow(row);
+                         displayProductDetails(row);
+                         displaySalesForm(row);
+                     }
+                 });
+             }
+         }
+
+         // Highlight selected row
+         function highlightRow(row) {
+             document.querySelectorAll("#products-table tr.product-info").forEach(r => r.classList.remove("bg-selected"));
+             row.classList.add("bg-selected");
+         }
+
+         // Display product details
+         function displayProductDetails(row) {
+             let productId = row.getAttribute("data-product-id");
+             fetch(`/Product/Details?id=${productId}`)
+                 .then(response => {
+                     if (!response.ok)
+                         throw new Error('Unexpected error has occurred while rendering product details.');
+                     return response.text();
+                 })
+                 .then(partialView => {
+                     document.getElementById("product-details").innerHTML = partialView;
+                 })
+                 .catch(error => {
+                     console.error("Error:", error);
+                     alert("An error occurred while loading the product details.");
+                 })
+         }
+
+         function displaySalesForm(row) {
+             let productId = row.getAttribute("data-product-id");
+             const salesForm = document.getElementById("sales-form");
+             const hiddenField = document.getElementById("SelectedProductId");
+             salesForm.style.display = "block";
+             hiddenField.value = productId;
+         }
+
+         function hideProductDetails() {
+             document.getElementById("product-details").innerHTML = "";
+         }
+
+         function hideSalesForm() {
+             document.getElementById("sales-form").style.display = "none";
+         }
+
+     </script>
+
+
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
